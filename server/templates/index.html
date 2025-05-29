@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 {{ project_name }} 🎯</h1>
+            <p id="instructions">
+                Look at the GIF! Hit the physical target that matches the emotion.
+            </p>
+        </header>
+
+        <main>
+            <div class="game-area">
+                <div id="gif-display">
+                    <h2 id="emotion-name">{{ initial_state.current_emotion_name }}</h2>
+                    <div class="gif-container">
+                        <img id="emotion-gif" src="{{ url_for('static', filename=initial_state.current_emotion_gif) }}" alt="Emotion GIF">
+                    </div>
+                    <p id="round-info">Round <span id="round-number">{{ initial_state.round_number }}</span> of <span id="total-rounds">{{ initial_state.total_rounds }}</span></p>
+                </div>
+
+                <div id="score-board">
+                    <h2>Score: <span id="score">{{ initial_state.score }}</span></h2>
+                </div>
+            </div>
+<!--
+            <div id="target-legend">
+                <h3>Target Legend:</h3>
+                <ul>
+                    {% for target_id, definition in initial_state.target_definitions | dictsort %}
+                        <li>Target {{ definition.id }}: {{ definition.emoji }} ({{ definition.label }})</li>
+                    {% else %}
+                        <li>No targets defined. Check config.py.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+-->        
+            <div id="game-over-message" style="display: none;">
+                <h2>Game Over!</h2>
+                <p>Your final score is: <span id="final-score">0</span>.</p>
+            </div>
+
+            <div class="controls">
+                 <form action="{{ url_for('reset_game') }}" method="post" id="reset-form">
+                    <button type="submit" id="reset-button">Reset Game</button>
+                </form>
+            </div>
+        </main>
+        
+        <footer>
+            <p>emji target - Have Fun!</p>
+        </footer>
+    </div>
+
+    <div id="emoji-rain-container"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
