@@ -1,7 +1,7 @@
 # emji_target/game_manager.py
 import random
 from queue import Queue, Empty
-from . import config # Assuming config.py is in the same directory or package
+import config # Assuming config.py is in the same directory or package
 
 class GameManager:
     def __init__(self):

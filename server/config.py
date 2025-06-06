@@ -14,11 +14,11 @@ NUM_TARGETS = 5  # Should match the Arduino's NUM_TARGETS
 # 'correct_target_id': The ID (0-4) of the physical target that is correct for this emotion.
 # 'rain_emoji': The emoji used for the "correct hit" rain effect.
 GAME_ROUNDS = [
-    #{'emotion_gif': 'gifs/happy.gif', 'emotion_name': 'Happy', 'correct_target_id': 0, 'rain_emoji': '😄'},
+    {'emotion_gif': 'gifs/happy.gif', 'emotion_name': 'Happy', 'correct_target_id': 0, 'rain_emoji': '😄'},
     {'emotion_gif': 'gifs/sad.gif', 'emotion_name': 'Sad', 'correct_target_id': 1, 'rain_emoji': '😢'},
     #{'emotion_gif': 'gifs/angry.gif', 'emotion_name': 'Angry', 'correct_target_id': 2, 'rain_emoji': '😠'},
-    {'emotion_gif': 'gifs/surprised.gif', 'emotion_name': 'Surprised', 'correct_target_id': 2, 'rain_emoji': '😮'},
-    {'emotion_gif': 'gifs/love.gif', 'emotion_name': 'Love', 'correct_target_id': 0, 'rain_emoji': '❤️'},
+    #{'emotion_gif': 'gifs/surprised.gif', 'emotion_name': 'Surprised', 'correct_target_id': 2, 'rain_emoji': '😮'},
+    {'emotion_gif': 'gifs/love.gif', 'emotion_name': 'Love', 'correct_target_id': 2, 'rain_emoji': '❤️'},
     # Add more rounds as desired
 ]
 
@@ -28,9 +28,7 @@ GAME_ROUNDS = [
 PHYSICAL_TARGET_DEFINITIONS = {
     0: {'id': 0, 'emoji': '😄', 'label': 'Target "Happy"'},
     1: {'id': 1, 'emoji': '😢', 'label': 'Target "Sad"'},
-    2: {'id': 2, 'emoji': '😠', 'label': 'Target "Angry"'},
-    3: {'id': 3, 'emoji': '😮', 'label': 'Target "Surprised"'},
-    4: {'id': 4, 'emoji': '❤️', 'label': 'Target "Love"'},
+    2: {'id': 2, 'emoji': '❤️', 'label': 'Target "Love"'}
 }
 
 # Emojis for the "incorrect hit" rain effect

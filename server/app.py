@@ -4,9 +4,10 @@ import json
 import time
 from queue import Empty
 
-from . import config # Local import
-from .game_manager import game # Import the global game instance from game_manager
-from .serial_listener import start_serial_listener_thread
+#from . import config # Local import
+import config # Local import
+from game_manager import game # Import the global game instance from game_manager
+from serial_listener import start_serial_listener_thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'votre_cle_secrete_ici_tres_importante' # Change this!

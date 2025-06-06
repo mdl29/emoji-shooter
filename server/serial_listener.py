@@ -2,8 +2,8 @@
 import serial
 import threading
 import time
-from . import config # Assuming config.py is in the same directory or package
-from .game_manager import game # Import the global game instance
+import config # Assuming config.py is in the same directory or package
+from game_manager import game # Import the global game instance
 
 def listen_to_arduino():
     ser = None
