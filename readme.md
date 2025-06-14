@@ -1,5 +1,7 @@
 # Emoji Shooter
 
+![alt](/src/img1.jpg)
+
 ## Description
 Emoji Shooter is a physical interactive shooting game where players use a rubber band gun to shoot jumping emoji targets. Each target is equipped with a switch-based detection system that registers successful hits.
 

@@ -1,5 +1,4 @@
 # emji_target/game_manager.py
-import random
 from queue import Queue, Empty
 import config # Assuming config.py is in the same directory or package
 
@@ -56,7 +55,6 @@ class GameManager:
             print(f"Correct hit on target {hit_target_id}! Score: {self.score}")
         else:
             self.score -= 1
-            rain_trigger_emoji = random.choice(config.LOSE_EMOJI_RAIN_OPTIONS)
             print(f"Incorrect hit on target {hit_target_id}. Score: {self.score}")
 
         self._broadcast_hit_result(is_correct, rain_trigger_emoji)
