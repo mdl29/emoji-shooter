@@ -1,0 +1,47 @@
+body {
+    background-color: #eeeeee;
+}
+
+h1 {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+h2 {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+header {
+    text-align: center;
+    font-size: 40px;
+}
+
+.content {
+    text-align: center;
+    font-size: 30px;
+}
+
+.gif {
+    margin-top: 2%;
+    border: 1px solid #969595;
+    border-radius: 20px;
+}
+
+.gif img {
+    width: 850px;
+}
+
+.points {
+    background-color: greenyellow;
+    color: white;
+    padding: 10px;
+}
+
+a {
+    text-decoration: none;
+    background-color: #b600ff;
+    color: white;
+    padding: 40px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 75px;
+    border-radius: 25px;
+}
