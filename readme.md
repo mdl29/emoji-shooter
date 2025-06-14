@@ -35,3 +35,5 @@ git clone https://github.com/mdl29/emoji-shooter.git
 cd emoji-shooter/server
 python app.py
 ```
+
+![alt](/src/shooting.gif)
