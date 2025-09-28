@@ -87,8 +87,13 @@
 
     /* Image centrée */
     .character {
-      max-width: 70%;
+        max-width: 40%;   /* limite en largeur */
+        max-height: 50vh; /* limite en hauteur par rapport à la fenêtre */
+        height: auto;     /* garde les proportions */
+        width: auto;      /* garde les proportions */
+        object-fit: contain; /* évite les déformations */
     }
+
 
     /* Score en bas */
     #score {
