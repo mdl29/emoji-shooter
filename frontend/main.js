@@ -49,7 +49,7 @@ btnConnect.addEventListener('click', async () => {
           // Vérifier s’il reste des cibles
           if (availableKeys.length === 0) {
             console.log("Toutes les cibles ont été touchées !");
-            character.src = "asset/victory.svg"; // image de fin
+            character.src = "asset/fest.svg"; // image de fin
             break;
           }
 
@@ -58,6 +58,9 @@ btnConnect.addEventListener('click', async () => {
           character.src = `asset/${randomKey}.svg`;
           currentKey = randomKey;
           current_id = emojis[currentKey];
+        } else {
+          score -= 2 ;
+          scoreElement.textContent = "Score: " + score;
         }
       }
     }
