@@ -58,7 +58,8 @@ btnConnect.addEventListener('click', async () => {
           character.src = `asset/${randomKey}.svg`;
           currentKey = randomKey;
           current_id = emojis[currentKey];
-        } else {
+        } else if ( score >= 2){
+          console.log("Raté : ",currentKey);
           score -= 2 ;
           scoreElement.textContent = "Score: " + score;
         }
