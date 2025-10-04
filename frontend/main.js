@@ -7,12 +7,12 @@ let score = 0;
 
 // Dictionnaire des emojis
 let emojis = {
-  "christian":0,
-  "adrien":1,
-  "erell":2,
-  "thibo":3,
-  "poop":4,
-  "cry":5,
+  "christian":1,
+  "adrien":2,
+  "erell":3,
+  "thibo":4,
+  "poop":5,
+  "cry":6,
 };
 
 // Liste dynamique des cibles disponibles
@@ -31,6 +31,7 @@ btnConnect.addEventListener('click', async () => {
   try {
     port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
+    alert("connecté");
 
     console.log("Port ouvert. En attente de données...\n");
 
@@ -43,7 +44,15 @@ btnConnect.addEventListener('click', async () => {
       if (done) break;
 
       if (value) {
-        if (parseInt(value.trim(), 10) === current_id) {
+        let triggeredTargetUnsafe = parseInt(value.trim(), 10);
+        if(isNaN(triggeredTargetUnsafe)){
+            continue;
+        }
+        let triggeredTarget = triggeredTargetUnsafe;
+        
+        console.log("TriggeredTarget : ", triggeredTarget);
+        
+        if (triggeredTarget === current_id) {
           console.log("Touché :", currentKey);
 
           // Retirer la cible actuelle de la liste
@@ -73,6 +82,7 @@ btnConnect.addEventListener('click', async () => {
       }
     }
   } catch (err) {
+    alert("erreur");
     console.error(err);
     console.log(`\nErreur : ${err}`);
   }
