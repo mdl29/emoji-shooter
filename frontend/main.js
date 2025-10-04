@@ -6,13 +6,20 @@ let port;
 let score = 0;
 
 // Dictionnaire des emojis
-let emojis = {"cricri":0,"happy":1,"kiss":2,"love":3};
+let emojis = {
+  "christian":0,
+  "adrien":1,
+  "erell":2,
+  "thibo":3,
+  "poop":4,
+  "cry":5,
+};
 
 // Liste dynamique des cibles disponibles
 let availableKeys = Object.keys(emojis);
 
 // Cible courante
-let currentKey = "cricri";
+let currentKey = "christian";
 let current_id = emojis[currentKey];
 
 btnConnect.addEventListener('click', async () => {
@@ -55,7 +62,7 @@ btnConnect.addEventListener('click', async () => {
 
           // Choisir une nouvelle cible au hasard
           const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-          character.src = `asset/${randomKey}.svg`;
+          character.src = `asset/targets/${randomKey}.svg`;
           currentKey = randomKey;
           current_id = emojis[currentKey];
         } else if ( score >= 2){
