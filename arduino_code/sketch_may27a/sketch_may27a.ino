@@ -30,7 +30,15 @@ public:
 
         //printState();
         digitalWrite(led, curState ? LOW : HIGH);
+
+        if (curState == HIGH) {
+          printId();
+        }
       }
+    }
+
+    void printId() {
+      Serial.println(id);
     }
 
     void printState() {
@@ -57,11 +65,11 @@ Target targets[] = {
 
 void setup() {
     Serial.begin(9600);
-    Serial.println("Arduino ready. Waiting for target hits...");
 }
 
 void loop() {
   for (auto& target : targets) {
     target.emit();
   }
+  delay(50);
 }
