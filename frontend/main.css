@@ -1,6 +1,56 @@
-.title {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+}
+
+button#connect {
+  height: 4%;
+  margin: 1em;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   text-align: center;
-  color: #0066cc;
+  padding: 20px;
+  width: 100%;
+}
+
+.menu-btn div {
+  width: 25px;
+  height: 3px;
+  background-color: black;
+  margin: 5px 0;
+}
+
+/* Image centrée */
+.character {
+  max-width: 40%;
+  /* limite en largeur */
+  max-height: 50vh;
+  /* limite en hauteur par rapport à la fenêtre */
+  height: auto;
+  /* garde les proportions */
+  width: auto;
+  /* garde les proportions */
+  object-fit: contain;
+  /* évite les déformations */
+}
+
+/* Score en bas */
+#score {
+  font-size: 22px;
   font-weight: bold;
-  margin-bottom: 2rem;
+  margin-bottom: 20px;
 }

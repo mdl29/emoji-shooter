@@ -15,75 +15,106 @@ let emojis = {
   "cry":6,
 };
 
-// Liste dynamique des cibles disponibles
 let availableKeys = Object.keys(emojis);
 
-// Cible courante
-let currentKey = "christian";
-let current_id = emojis[currentKey];
+// Cible actuelle
+let currentKey;
+let current_id;
+
+function updateScore() {
+  scoreElement.textContent = "Score: " + score;
+}
+
+function updateTarget() {
+  const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+  character.src = `asset/targets/${randomKey}.svg`;
+  currentKey = randomKey;
+  current_id = emojis[currentKey];
+}
+
+async function mainloop() {
+  // Full reset
+  availableKeys = Object.keys(emojis);
+  score = 0;
+  updateScore();
+  updateTarget();
+
+  const textDecoder = new TextDecoderStream();
+  const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+  const readerStream = textDecoder.readable.getReader();
+
+  while (true) {
+    const { value, done } = await readerStream.read();
+    if (done) break;
+
+    if (value) {
+      let triggeredTargetUnsafe = parseInt(value.trim(), 10);
+      if(isNaN(triggeredTargetUnsafe)){
+          continue;
+      }
+
+      let triggeredTarget = triggeredTargetUnsafe;
+      
+      if (triggeredTarget === current_id) {
+        console.log("Touché :", currentKey);
+
+        availableKeys = availableKeys.filter(k => k !== currentKey);
+
+        score += 5;
+        updateScore();
+
+        // Vérifier s’il reste des cibles
+        if (availableKeys.length === 0) {
+          console.log("Toutes les cibles ont été touchées !");
+          character.src = "asset/fest.svg";
+          break;
+        }
+        
+        updateTarget();
+      } else if ( score >= 2){
+        console.log("Raté : ",currentKey);
+        score -= 2 ;
+        updateScore();
+      }
+    }
+  }
+}
+
+async function countdown() {
+  for (let i = 5; i > 0; i--) {
+    scoreElement.textContent = `Prochaine partie dans... ${i}`;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+}
 
 btnConnect.addEventListener('click', async () => {
   if (!('serial' in navigator)) {
-    console.log("Erreur : Web Serial API non supportée par ce navigateur.");
+    alert("Erreur : Web Serial API non supportée par ce navigateur.");
     return;
   }
+  
+  btnConnect.hidden = true;
 
   try {
     port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
-    alert("connecté");
+    alert("Connecté");
 
     console.log("Port ouvert. En attente de données...\n");
 
-    const textDecoder = new TextDecoderStream();
-    const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-    const readerStream = textDecoder.readable.getReader();
-
     while (true) {
-      const { value, done } = await readerStream.read();
-      if (done) break;
-
-      if (value) {
-        let triggeredTargetUnsafe = parseInt(value.trim(), 10);
-        if(isNaN(triggeredTargetUnsafe)){
-            continue;
-        }
-        let triggeredTarget = triggeredTargetUnsafe;
-        
-        console.log("TriggeredTarget : ", triggeredTarget);
-        
-        if (triggeredTarget === current_id) {
-          console.log("Touché :", currentKey);
-
-          // Retirer la cible actuelle de la liste
-          availableKeys = availableKeys.filter(k => k !== currentKey);
-
-          // Ajouter du score
-          score += 5;
-          scoreElement.textContent = "Score: " + score;
-
-          // Vérifier s’il reste des cibles
-          if (availableKeys.length === 0) {
-            console.log("Toutes les cibles ont été touchées !");
-            character.src = "asset/fest.svg"; // image de fin
-            break;
-          }
-
-          // Choisir une nouvelle cible au hasard
-          const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-          character.src = `asset/targets/${randomKey}.svg`;
-          currentKey = randomKey;
-          current_id = emojis[currentKey];
-        } else if ( score >= 2){
-          console.log("Raté : ",currentKey);
-          score -= 2 ;
-          scoreElement.textContent = "Score: " + score;
-        }
-      }
+      await mainloop();
+      await countdown();
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
+
   } catch (err) {
-    alert("erreur");
+    alert("Erreur lors de connexion, regardez la console");
     console.error(err);
     console.log(`\nErreur : ${err}`);
+  } finally {
+    if (port) {
+      await port.close();
+    }
   }
 });
