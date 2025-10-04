@@ -10,7 +10,10 @@ public:
         pin = inputPin;
         id = targetId;
         led = ledPin;
-        lastState = (digitalRead(pin) == HIGH);
+    }
+
+    void init() {
+        lastState = (digitalRead(pin) == LOW);
 
         pinMode(led, OUTPUT);
         pinMode(pin, INPUT_PULLUP);
@@ -33,6 +36,7 @@ public:
 
         if (curState == HIGH) {
           printId();
+          delay(3000);
         }
       }
     }
@@ -54,22 +58,26 @@ public:
     
 };
 
+
 Target targets[] = {
-    Target(2, 1, 8),
-    Target(3, 2, 9),
-    Target(4, 3, 10),
-    Target(5, 4, 11),
-    Target(6, 5, 12),
-    Target(7, 6, 13)
+  Target(2, 1, 8),
+  Target(3, 2, 9),
+  Target(4, 3, 10),
+  Target(5, 4, 11),
+  Target(6, 5, 12),
+  Target(7, 6, 13)
 };
 
 void setup() {
-    Serial.begin(9600);
+  Serial.begin(9600);
+  
+  for (auto& target : targets) {
+    target.init();
+  }
 }
 
 void loop() {
   for (auto& target : targets) {
     target.emit();
   }
-  delay(50);
 }
