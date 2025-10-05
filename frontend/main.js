@@ -32,16 +32,12 @@ function updateTarget() {
   current_id = emojis[currentKey];
 }
 
-async function mainloop() {
+async function mainloop(readerStream) {
   // Full reset
   availableKeys = Object.keys(emojis);
   score = 0;
   updateScore();
   updateTarget();
-
-  const textDecoder = new TextDecoderStream();
-  const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-  const readerStream = textDecoder.readable.getReader();
 
   while (true) {
     const { value, done } = await readerStream.read();
@@ -62,19 +58,23 @@ async function mainloop() {
 
         score += 5;
         updateScore();
-
-        // Vérifier s’il reste des cibles
-        if (availableKeys.length === 0) {
-          console.log("Toutes les cibles ont été touchées !");
-          character.src = "asset/fest.svg";
-          break;
+        updateTarget();
+      } else {
+        console.log("Raté : ",currentKey);
+        if (score >= 5) {
+            score -= 2;
         }
         
-        updateTarget();
-      } else if ( score >= 2){
-        console.log("Raté : ",currentKey);
-        score -= 2 ;
+        triggeredEmojiName = Object.keys(emojis)[triggeredTarget - 1];
+        console.log("retire "+triggeredEmojiName+" "+triggeredTarget);
+        availableKeys = availableKeys.filter(k => k !== triggeredEmojiName);
         updateScore();
+      }
+      // Vérifier s’il reste des cibles
+      if (availableKeys.length === 0) {
+        console.log("Toutes les cibles ont été touchées !");
+        character.src = "asset/fest.svg";
+        break;
       }
     }
   }
@@ -102,10 +102,15 @@ btnConnect.addEventListener('click', async () => {
 
     console.log("Port ouvert. En attente de données...\n");
 
+    const textDecoder = new TextDecoderStream();
+    const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+    const readerStream = textDecoder.readable.getReader();
+
     while (true) {
-      await mainloop();
+      await mainloop(readerStream);
       await countdown();
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      //await new Promise(resolve => setTimeout(resolve, 1000));
+      alert("Appuyez sur Entrée pour recommencer");
     }
 
   } catch (err) {
