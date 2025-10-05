@@ -36,7 +36,7 @@ public:
 
         if (curState == HIGH) {
           printId();
-          delay(3000);
+          delay(500);
         }
       }
     }
