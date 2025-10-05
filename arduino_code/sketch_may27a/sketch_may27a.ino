@@ -10,7 +10,10 @@ public:
         pin = inputPin;
         id = targetId;
         led = ledPin;
-        lastState = (digitalRead(pin) == HIGH);
+    }
+
+    void init() {
+        lastState = (digitalRead(pin) == LOW);
 
         pinMode(led, OUTPUT);
         pinMode(pin, INPUT_PULLUP);
@@ -30,7 +33,16 @@ public:
 
         //printState();
         digitalWrite(led, curState ? LOW : HIGH);
+
+        if (curState == HIGH) {
+          printId();
+          delay(500);
+        }
       }
+    }
+
+    void printId() {
+      Serial.println(id);
     }
 
     void printState() {
@@ -46,18 +58,22 @@ public:
     
 };
 
+
 Target targets[] = {
-    Target(2, 1, 8),
-    Target(3, 2, 9),
-    Target(4, 3, 10),
-    Target(5, 4, 11),
-    Target(6, 5, 12),
-    Target(7, 6, 13)
+  Target(2, 1, 8),
+  Target(3, 2, 9),
+  Target(4, 3, 10),
+  Target(5, 4, 11),
+  Target(6, 5, 12),
+  Target(7, 6, 13)
 };
 
 void setup() {
-    Serial.begin(9600);
-    Serial.println("Arduino ready. Waiting for target hits...");
+  Serial.begin(9600);
+  
+  for (auto& target : targets) {
+    target.init();
+  }
 }
 
 void loop() {

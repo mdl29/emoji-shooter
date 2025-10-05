@@ -3,141 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Emoji Shooter</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: row; /* Sidebar à gauche + contenu à droite */
-      overflow-x: hidden;
-    }
-
-    /* Sidebar (menu) */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -220px; /* cachée par défaut */
-      width: 200px;
-      height: 100%;
-      background-color: #f8f8f8;
-      border-right: 2px solid black;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      transition: left 0.3s ease;
-      z-index: 1000;
-    }
-
-    .sidebar.active {
-      left: 0;
-    }
-
-    .sidebar button {
-      padding: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 50px;
-    }
-
-    /* Conteneur principal */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column; /* Titre en haut, image au milieu, score en bas */
-      justify-content: space-between;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-      width: 100%;
-    }
-
-    /* Barre du haut */
-    .topbar {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      padding: 10px;
-    }
-
-    /* Bouton menu (hamburger) */
-    .menu-btn {
-      position: absolute;
-      left: 15px;
-      top: 15px;
-      cursor: pointer;
-      z-index: 1001;
-    }
-
-    .menu-btn div {
-      width: 25px;
-      height: 3px;
-      background-color: black;
-      margin: 5px 0;
-    }
-
-    /* Image centrée */
-    .character {
-        max-width: 40%;   /* limite en largeur */
-        max-height: 50vh; /* limite en hauteur par rapport à la fenêtre */
-        height: auto;     /* garde les proportions */
-        width: auto;      /* garde les proportions */
-        object-fit: contain; /* évite les déformations */
-    }
-
-
-    /* Score en bas */
-    #score {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="main.css">
 </head>
 <body>
-  <!-- Menu latéral caché -->
-  <div class="sidebar" id="sidebar">
-    <button id="connect">Connecter au port série</button>
-  </div>
+  <button id="connect">Connecter au port série</button>
 
-  <!-- Contenu principal -->
   <div class="main-content">
-    <!-- Titre en haut avec menu hamburger -->
     <div class="topbar">
-      <div class="menu-btn" id="menu-toggle">
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
       <h1>Emoji Shooter</h1>
     </div>
 
-    <!-- Image au milieu -->
     <img src="asset/targets/christian.svg" alt="Personnage" class="character">
 
-    <!-- Score en bas -->
     <h1 id="score">SCORE : 0</h1>
   </div>
 
-  <pre id="output" style="display:none;">Aucune donnée reçue pour l’instant.</pre>
+  <pre id="output" style="display:none;">Aucune donnée reçue pour l'instant.</pre>
 
   <script src="main.js"></script>
-  <script>
-    const menuToggle = document.getElementById("menu-toggle");
-    const sidebar = document.getElementById("sidebar");
-
-    menuToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("active");
-    });
-  </script>
 </body>
 </html>
