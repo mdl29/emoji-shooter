@@ -25,7 +25,7 @@ public:
     }
 
     void updateLED() {
-        digitalWrite(led, state() ? LOW : HIGH);
+        digitalWrite(led, !state());
     }
 
     void emit() {
