@@ -18,6 +18,11 @@ public:
 
         lastState = digitalRead(pin);
         updateLED();
+
+        if (lastState == HIGH) {
+          printId();
+          delay(500);
+        }
     }
 
     bool state() {

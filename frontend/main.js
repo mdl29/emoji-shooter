@@ -7,12 +7,12 @@ let score = 0;
 
 // Dictionnaire des emojis
 let emojis = {
-  "christian":1,
-  "adrien":2,
-  "erell":3,
-  "thibo":4,
-  "poop":5,
-  "cry":6,
+  "christian": 1,
+  "adrien": 2,
+  "erell": 3,
+  "thibo": 4,
+  "poop": 5,
+  "cry": 6,
 };
 
 let availableKeys = Object.keys(emojis);
@@ -45,12 +45,12 @@ async function mainloop(readerStream, writer) {
 
     if (value) {
       let triggeredTargetUnsafe = parseInt(value.trim(), 10);
-      if(isNaN(triggeredTargetUnsafe)){
-          continue;
+      if (isNaN(triggeredTargetUnsafe)) {
+        continue;
       }
 
       let triggeredTarget = triggeredTargetUnsafe;
-      
+
       if (triggeredTarget === current_id) {
         console.log("Touché :", currentKey);
 
@@ -60,13 +60,13 @@ async function mainloop(readerStream, writer) {
         updateScore();
         updateTarget();
       } else {
-        console.log("Raté : ",currentKey);
+        console.log("Raté : ", currentKey);
         if (score >= 5) {
-            score -= 2;
+          score -= 2;
         }
-        
+
         triggeredEmojiName = Object.keys(emojis)[triggeredTarget - 1];
-        console.log("retire "+triggeredEmojiName+" "+triggeredTarget);
+        console.log("retire " + triggeredEmojiName + " " + triggeredTarget);
         availableKeys = availableKeys.filter(k => k !== triggeredEmojiName);
         updateScore();
       }
@@ -74,11 +74,11 @@ async function mainloop(readerStream, writer) {
       if (availableKeys.length === 0) {
         console.log("Toutes les cibles ont été touchées !");
         character.src = "asset/fest.svg";
-        
+
         // Send 'f' command to trigger LED blink
         await writer.write('f');
         console.log("Commande 'f' envoyée pour faire clignoter les LEDs");
-        
+
         break;
       }
     }
@@ -97,11 +97,17 @@ btnConnect.addEventListener('click', async () => {
     alert("Erreur : Web Serial API non supportée par ce navigateur.");
     return;
   }
-  
+
   btnConnect.hidden = true;
 
   try {
-    port = await navigator.serial.requestPort();
+    const filters = [
+      { usbVendorId: 0x2341, usbProductId: 0x0043 },
+      { usbVendorId: 0x2341, usbProductId: 0x0001 }
+    ];
+
+    // Prompt user to select an Arduino Uno device.
+    port = await navigator.serial.requestPort({ filters });
     await port.open({ baudRate: 9600 });
     alert("Connecté");
 
