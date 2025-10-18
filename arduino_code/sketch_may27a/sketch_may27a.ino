@@ -105,6 +105,10 @@ void loop() {
     char incomingChar = Serial.read();
     if (incomingChar == 'f') {
       blinkAllLEDs();
+      // Clear any remaining characters in the buffer
+      while (Serial.available() > 0) {
+        Serial.read();
+      }
     }
   }
   
