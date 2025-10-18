@@ -32,7 +32,7 @@ function updateTarget() {
   current_id = emojis[currentKey];
 }
 
-async function mainloop(readerStream) {
+async function mainloop(readerStream, writer) {
   // Full reset
   availableKeys = Object.keys(emojis);
   score = 0;
@@ -74,6 +74,11 @@ async function mainloop(readerStream) {
       if (availableKeys.length === 0) {
         console.log("Toutes les cibles ont été touchées !");
         character.src = "asset/fest.svg";
+        
+        // Send 'f' command to trigger LED blink
+        await writer.write('f');
+        console.log("Commande 'f' envoyée pour faire clignoter les LEDs");
+        
         break;
       }
     }
@@ -106,8 +111,12 @@ btnConnect.addEventListener('click', async () => {
     const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
     const readerStream = textDecoder.readable.getReader();
 
+    const textEncoder = new TextEncoderStream();
+    const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+    const writer = textEncoder.writable.getWriter();
+
     while (true) {
-      await mainloop(readerStream);
+      await mainloop(readerStream, writer);
       await countdown();
       //await new Promise(resolve => setTimeout(resolve, 1000));
       alert("Appuyez sur Entrée pour recommencer");
