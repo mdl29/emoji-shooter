@@ -74,16 +74,18 @@ Target targets[] = {
 };
 
 void blinkAllLEDs() {
-  // Blink all LEDs in sync: HIGH 100ms, LOW 100ms
-  for (auto& target : targets) {
-    digitalWrite(target.led, HIGH);
+  // Blink all LEDs in sync: HIGH 100ms, LOW 100ms for 20 cycles
+  for (int cycle = 0; cycle < 20; cycle++) {
+    for (auto& target : targets) {
+      digitalWrite(target.led, HIGH);
+    }
+    delay(100);
+    
+    for (auto& target : targets) {
+      digitalWrite(target.led, LOW);
+    }
+    delay(100);
   }
-  delay(100);
-  
-  for (auto& target : targets) {
-    digitalWrite(target.led, LOW);
-  }
-  delay(100);
   
   // Restore LED states based on target states
   for (auto& target : targets) {
