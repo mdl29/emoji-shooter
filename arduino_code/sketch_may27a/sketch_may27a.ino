@@ -73,6 +73,24 @@ Target targets[] = {
   Target(7, 6, 13)
 };
 
+void blinkAllLEDs() {
+  // Blink all LEDs in sync: HIGH 100ms, LOW 100ms
+  for (auto& target : targets) {
+    digitalWrite(target.led, HIGH);
+  }
+  delay(100);
+  
+  for (auto& target : targets) {
+    digitalWrite(target.led, LOW);
+  }
+  delay(100);
+  
+  // Restore LED states based on target states
+  for (auto& target : targets) {
+    target.updateLED();
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   
@@ -82,6 +100,14 @@ void setup() {
 }
 
 void loop() {
+  // Check for serial input
+  if (Serial.available() > 0) {
+    char incomingChar = Serial.read();
+    if (incomingChar == 'f') {
+      blinkAllLEDs();
+    }
+  }
+  
   for (auto& target : targets) {
     target.emit();
   }
