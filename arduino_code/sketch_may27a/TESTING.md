@@ -20,8 +20,8 @@ When the character 'f' is sent to the Arduino via serial communication, all LEDs
 # Find your Arduino port
 ls /dev/tty*
 
-# Send 'f' command
-echo "f" > /dev/ttyACM0  # Replace with your actual port
+# Send 'f' command (without newline)
+echo -n "f" > /dev/ttyACM0  # Replace with your actual port
 ```
 
 ### Method 3: Using Python
