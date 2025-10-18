@@ -13,17 +13,22 @@ public:
     }
 
     void init() {
-        lastState = (digitalRead(pin) == LOW);
-
         pinMode(led, OUTPUT);
         pinMode(pin, INPUT_PULLUP);
+
+        lastState = digitalRead(pin);
+        updateLED();
     }
 
     bool state() {
-        return (digitalRead(pin) == HIGH);
+        return digitalRead(pin);
     }
 
-    bool emit() {
+    void updateLED() {
+        digitalWrite(led, !state());
+    }
+
+    void emit() {
       // Run every cycle
       // Change led state depending on input
       
@@ -32,7 +37,7 @@ public:
         lastState = curState;
 
         //printState();
-        digitalWrite(led, curState ? LOW : HIGH);
+        updateLED();
 
         if (curState == HIGH) {
           printId();
