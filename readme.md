@@ -1,6 +1,6 @@
 # Emoji Shooter
 
-![Image of three targets](/.github/images/img1.jpg)
+![Image of three targets](/doc/images/img1.jpg)
 
 ## Description
 Emoji Shooter is an interactive shooting game. Players use a rubber band gun to shoot at jumping emoji targets. Each target is equipped with a mechanical switch for hit detection, and the game is tracked by an Arduino Uno. A web frontend displays the score and interacts with the hardware via serial communication.
@@ -33,4 +33,4 @@ Each emoji target sits on a base with a mechanical switch. When upright, the tar
 4. Connect to the Arduino with the button on top-left
 5. Play by shooting at the emoji targets and watch your score update in real time
 
-![Demo of a target being shot](/.github/images/shooting.gif)
+![Demo of a target being shot](/doc/images/shooting.gif)
