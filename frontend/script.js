@@ -52,7 +52,7 @@ async function mainloop(readerStream, writer) {
       let triggeredTarget = triggeredTargetUnsafe;
 
       if (triggeredTarget === current_id) {
-        console.log("Touché :", currentKey);
+        console.log("Hit :", currentKey);
 
         availableKeys = availableKeys.filter(k => k !== currentKey);
 
@@ -60,13 +60,13 @@ async function mainloop(readerStream, writer) {
         updateScore();
         updateTarget();
       } else {
-        console.log("Raté : ", currentKey);
+        console.log("Missed : ", currentKey);
         if (score >= 5) {
           score -= 2;
         }
 
         triggeredEmojiName = Object.keys(emojis)[triggeredTarget - 1];
-        console.log("retire " + triggeredEmojiName + " " + triggeredTarget);
+        console.log("Removed " + triggeredEmojiName + " (" + triggeredTarget+")");
         availableKeys = availableKeys.filter(k => k !== triggeredEmojiName);
         updateScore();
       }
@@ -77,7 +77,7 @@ async function mainloop(readerStream, writer) {
 
         // Send 'f' command to trigger LED blink
         await writer.write('f');
-        console.log("Commande 'f' envoyée pour faire clignoter les LEDs");
+        console.log("Command 'f' sent to make LED blinks");
 
         break;
       }
@@ -111,7 +111,7 @@ btnConnect.addEventListener('click', async () => {
     await port.open({ baudRate: 9600 });
     alert("Connecté");
 
-    console.log("Port ouvert. En attente de données...\n");
+    console.log("Port open, waiting for inputs...\n");
 
     const textDecoder = new TextDecoderStream();
     const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);

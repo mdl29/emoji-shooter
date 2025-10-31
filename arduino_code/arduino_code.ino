@@ -1,7 +1,7 @@
 class Target {
 public:
     int pin;
-    int id; // Unique ID, currently used for debugging
+    int id;
     int led;
     
     bool lastState;
