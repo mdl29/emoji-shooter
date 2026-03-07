@@ -1,12 +1,14 @@
 const btnConnect = document.getElementById('connect');
 const scoreElement = document.getElementById('score');
 const character = document.querySelector(".character");
+const debugMenu = document.querySelector('.debug-menu');
+const debugContent = document.getElementById('debugContent');
 
 let port;
 let score = 0;
 
-// Dictionnaire des emojis
-let emojis = {
+// Dictionnaire des emojis (clés par défaut)
+let emojisNames = {
   "christian": 1,
   "adrien": 2,
   "erell": 3,
@@ -15,7 +17,99 @@ let emojis = {
   "cry": 6,
 };
 
+// Dictionnaire mutable pour les assignments
+let emojis = JSON.parse(JSON.stringify(emojisNames));
+
 let availableKeys = Object.keys(emojis);
+
+// Hide debug menu by default
+debugContent.classList.add('hidden');
+debugMenu.classList.add('hidden');
+
+// Debug menu toggle function
+function toggleDebugMenu() {
+  debugContent.classList.toggle('hidden');
+  debugMenu.classList.toggle('hidden');
+}
+
+// Keyboard shortcut to toggle debug menu
+document.addEventListener('keydown', (e) => {
+  // Check for ² (touche au carré) or ù (touche accent grave)
+  if (e.key === '²' || e.key === 'ù' || e.key === '√' || e.code === 'BracketRight' || e.code === 'Backquote') {
+    e.preventDefault();
+    toggleDebugMenu();
+  }
+});
+
+// Load config from localStorage
+function loadConfigFromStorage() {
+  const saved = localStorage.getItem('emojisConfig');
+  if (saved) {
+    try {
+      emojis = JSON.parse(saved);
+      console.log('Config loaded from localStorage:', emojis);
+    } catch (e) {
+      console.error('Erreur lors du chargement de la config:', e);
+    }
+  }
+}
+
+// Save config to localStorage
+function saveConfigToStorage() {
+  localStorage.setItem('emojisConfig', JSON.stringify(emojis));
+  console.log('Config saved to localStorage:', emojis);
+}
+
+// Reset config to defaults
+function resetConfig() {
+  emojis = JSON.parse(JSON.stringify(emojisNames));
+  localStorage.removeItem('emojisConfig');
+  // Update UI
+  for (let i = 1; i <= 6; i++) {
+    const select = document.getElementById(`target-${i}`);
+    if (select) {
+      const defaultKey = Object.keys(emojisNames).find(k => emojisNames[k] === i);
+      if (defaultKey) {
+        select.value = defaultKey;
+      }
+    }
+  }
+  console.log('Config reset to defaults');
+}
+
+// Load config on startup
+loadConfigFromStorage();
+
+// Reset button handler
+const resetBtn = document.getElementById('resetConfig');
+if (resetBtn) {
+  resetBtn.addEventListener('click', () => {
+    if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) {
+      resetConfig();
+    }
+  });
+}
+
+// Change handlers pour les dropdowns
+for (let i = 1; i <= 6; i++) {
+  const select = document.getElementById(`target-${i}`);
+  if (select) {
+    // Set default value based on current emojis (from storage or defaults)
+    const defaultKey = Object.keys(emojis).find(k => emojis[k] === i);
+    if (defaultKey) {
+      select.value = defaultKey;
+    }
+    
+    select.addEventListener('change', (e) => {
+      const newValue = e.target.value;
+      // Update emojis dictionary
+      emojis[newValue] = i;
+      console.log(`Target ${i} changed to: ${newValue}`);
+      // Save to localStorage
+      saveConfigToStorage();
+    });
+  }
+}
 
 // Cible actuelle
 let currentKey;
