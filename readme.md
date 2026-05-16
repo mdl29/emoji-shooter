@@ -34,3 +34,6 @@ Each emoji target sits on a base with a mechanical switch. When upright, the tar
 5. Play by shooting at the emoji targets and watch your score update in real time
 
 ![Demo of a target being shot](/doc/images/shooting.gif)
+
+## Copyright 
+license gpl 
