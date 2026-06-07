@@ -30,6 +30,7 @@
   let score = 0;
   let scoreText = 'SCORE: 0';
   let emojis = { ...defaultEmojis };
+  let selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
   let availableKeys = Object.keys(defaultEmojis);
   let currentKey = 'christian';
   let currentTargetId = defaultEmojis[currentKey];
@@ -66,6 +67,15 @@
     return Object.keys(emojis).find((key) => emojis[key] === targetId);
   }
 
+  function getSelectedEmojiByTarget(sourceEmojis) {
+    return Object.fromEntries(
+      targetIds.map((targetId) => [
+        targetId,
+        Object.keys(sourceEmojis).find((key) => sourceEmojis[key] === targetId)
+      ])
+    );
+  }
+
   function getAssignedEmojiKeys() {
     return targetIds.map(getEmojiForTarget).filter(Boolean);
   }
@@ -85,6 +95,7 @@
 
     nextEmojis[newKey] = targetId;
     emojis = nextEmojis;
+    selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
   }
 
   function formatEmojiName(key) {
@@ -122,6 +133,7 @@
     if (!confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) return;
 
     emojis = { ...defaultEmojis };
+    selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
     localStorage.removeItem('emojisConfig');
     console.log('Config reset to defaults');
   }
@@ -255,7 +267,7 @@
   <div class:hidden={debugHidden} class="debug-content">
     <div class="debug-section">
       <button class="reset-btn" onclick={resetConfig}>Recommencer</button>
-      <label>Cibles assignées:</label>
+      <p class="debug-label">Cibles assignées:</p>
       <div class="targets-grid">
         {#each targetIds as targetId}
           <div class="target-item">
@@ -263,7 +275,7 @@
             <select
               id={`target-${targetId}`}
               class="target-select"
-              value={getEmojiForTarget(targetId)}
+              value={selectedEmojiByTarget[targetId]}
               onchange={(event) => changeTarget(targetId, event)}
             >
               {#each emojiDrawings as key}
