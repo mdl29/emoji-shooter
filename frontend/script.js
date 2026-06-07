@@ -14,13 +14,100 @@ let emojisNames = {
   "erell": 3,
   "thibo": 4,
   "poop": 5,
-  "cry": 6,
+  "cry": 6
 };
+
+const emojiDrawings = [
+  "christian",
+  "adrien",
+  "erell",
+  "thibo",
+  "poop",
+  "cry",
+  "devil",
+  "laugh",
+  "thug",
+  "kiss",
+  "chocked"
+];
 
 // Dictionnaire mutable pour les assignments
 let emojis = JSON.parse(JSON.stringify(emojisNames));
 
 let availableKeys = Object.keys(emojis);
+const targetCount = Object.keys(emojisNames).length;
+
+function getEmojiForTarget(targetId) {
+  return Object.keys(emojis).find(k => emojis[k] === targetId);
+}
+
+function getAssignedEmojiKeys() {
+  return Array.from({ length: targetCount }, (_, i) => getEmojiForTarget(i + 1)).filter(Boolean);
+}
+
+function assignEmojiToTarget(targetId, newKey) {
+  const previousKeyForTarget = getEmojiForTarget(targetId);
+  const previousTargetForKey = emojis[newKey];
+
+  if (previousKeyForTarget) {
+    delete emojis[previousKeyForTarget];
+  }
+
+  if (previousTargetForKey && previousTargetForKey !== targetId && previousKeyForTarget) {
+    emojis[previousKeyForTarget] = previousTargetForKey;
+  }
+
+  emojis[newKey] = targetId;
+}
+
+function syncTargetControls() {
+  for (let i = 1; i <= targetCount; i++) {
+    const select = document.getElementById(`target-${i}`);
+    const assignedKey = getEmojiForTarget(i);
+    if (select && assignedKey) {
+      select.value = assignedKey;
+    }
+  }
+}
+
+function formatEmojiName(key) {
+  if (key === 'chocked') return 'Choqué';
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function ensureTargetControls() {
+  const grid = document.querySelector('.targets-grid');
+  if (!grid) return;
+
+  for (let i = 1; i <= targetCount; i++) {
+    let select = document.getElementById(`target-${i}`);
+
+    if (!select) {
+      const targetItem = document.createElement('div');
+      targetItem.className = 'target-item';
+
+      const label = document.createElement('span');
+      label.textContent = `Cible ${i}:`;
+
+      select = document.createElement('select');
+      select.id = `target-${i}`;
+      select.className = 'target-select';
+
+      targetItem.append(label, select);
+      grid.appendChild(targetItem);
+    }
+
+    select.replaceChildren();
+    for (const key of emojiDrawings) {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = formatEmojiName(key);
+      select.appendChild(option);
+    }
+  }
+}
+
+ensureTargetControls();
 
 // Hide debug menu by default
 debugContent.classList.add('hidden');
@@ -46,7 +133,16 @@ function loadConfigFromStorage() {
   const saved = localStorage.getItem('emojisConfig');
   if (saved) {
     try {
-      emojis = JSON.parse(saved);
+      const savedConfig = JSON.parse(saved);
+      emojis = JSON.parse(JSON.stringify(emojisNames));
+
+      for (let i = 1; i <= targetCount; i++) {
+        const savedKey = emojiDrawings.find(k => savedConfig[k] === i);
+        if (savedKey) {
+          assignEmojiToTarget(i, savedKey);
+        }
+      }
+
       console.log('Config loaded from localStorage:', emojis);
     } catch (e) {
       console.error('Erreur lors du chargement de la config:', e);
@@ -65,15 +161,7 @@ function resetConfig() {
   emojis = JSON.parse(JSON.stringify(emojisNames));
   localStorage.removeItem('emojisConfig');
   // Update UI
-  for (let i = 1; i <= 6; i++) {
-    const select = document.getElementById(`target-${i}`);
-    if (select) {
-      const defaultKey = Object.keys(emojisNames).find(k => emojisNames[k] === i);
-      if (defaultKey) {
-        select.value = defaultKey;
-      }
-    }
-  }
+  syncTargetControls();
   console.log('Config reset to defaults');
 }
 
@@ -91,11 +179,11 @@ if (resetBtn) {
 }
 
 // Change handlers pour les dropdowns
-for (let i = 1; i <= 6; i++) {
+for (let i = 1; i <= targetCount; i++) {
   const select = document.getElementById(`target-${i}`);
   if (select) {
     // Set default value based on current emojis (from storage or defaults)
-    const defaultKey = Object.keys(emojis).find(k => emojis[k] === i);
+    const defaultKey = getEmojiForTarget(i);
     if (defaultKey) {
       select.value = defaultKey;
     }
@@ -103,7 +191,8 @@ for (let i = 1; i <= 6; i++) {
     select.addEventListener('change', (e) => {
       const newValue = e.target.value;
       // Update emojis dictionary
-      emojis[newValue] = i;
+      assignEmojiToTarget(i, newValue);
+      syncTargetControls();
       console.log(`Target ${i} changed to: ${newValue}`);
       // Save to localStorage
       saveConfigToStorage();
@@ -128,7 +217,7 @@ function updateTarget() {
 
 async function mainloop(readerStream, writer) {
   // Full reset
-  availableKeys = Object.keys(emojis);
+  availableKeys = getAssignedEmojiKeys();
   score = 0;
   updateScore();
   updateTarget();
@@ -152,16 +241,17 @@ async function mainloop(readerStream, writer) {
 
         score += 5;
         updateScore();
-        updateTarget();
       } else {
         console.log("Missed : ", currentKey);
         if (score >= 5) {
           score -= 2;
         }
 
-        triggeredEmojiName = Object.keys(emojis)[triggeredTarget - 1];
-        console.log("Removed " + triggeredEmojiName + " (" + triggeredTarget+")");
-        availableKeys = availableKeys.filter(k => k !== triggeredEmojiName);
+        const triggeredEmojiName = getEmojiForTarget(triggeredTarget);
+        if (triggeredEmojiName) {
+          console.log("Removed " + triggeredEmojiName + " (" + triggeredTarget+")");
+          availableKeys = availableKeys.filter(k => k !== triggeredEmojiName);
+        }
         updateScore();
       }
       // Vérifier s’il reste des cibles
@@ -175,6 +265,8 @@ async function mainloop(readerStream, writer) {
 
         break;
       }
+
+      updateTarget();
     }
   }
 }
