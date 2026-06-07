@@ -13,6 +13,12 @@ body {
   color: #1a1a1a;
 }
 
+#app {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
 button#connect {
   position: fixed;
   top: 24px;
