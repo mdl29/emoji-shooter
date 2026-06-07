@@ -37,6 +37,8 @@
   let characterSrc = targetSrc(currentKey);
   let connectHidden = false;
   let debugHidden = true;
+  let isCountingDown = false;
+  let restartRequested = false;
 
   onMount(() => {
     loadConfigFromStorage();
@@ -129,13 +131,19 @@
     console.log('Config saved to localStorage:', emojis);
   }
 
-  function resetConfig() {
-    if (!confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) return;
+  function startGame() {
+    availableKeys = getAssignedEmojiKeys();
+    score = 0;
+    updateScore();
+    updateTarget();
+  }
 
-    emojis = { ...defaultEmojis };
-    selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
-    localStorage.removeItem('emojisConfig');
-    console.log('Config reset to defaults');
+  function restartGame() {
+    if (isCountingDown) {
+      restartRequested = true;
+    }
+
+    startGame();
   }
 
   function changeTarget(targetId, event) {
@@ -157,10 +165,7 @@
   }
 
   async function mainloop(readerStream, writer) {
-    availableKeys = getAssignedEmojiKeys();
-    score = 0;
-    updateScore();
-    updateTarget();
+    startGame();
 
     while (true) {
       const { value, done } = await readerStream.read();
@@ -202,10 +207,17 @@
   }
 
   async function countdown() {
+    isCountingDown = true;
+
     for (let i = 5; i > 0; i--) {
+      if (restartRequested) break;
+
       scoreText = `Prochaine partie dans... ${i}`;
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
+
+    restartRequested = false;
+    isCountingDown = false;
   }
 
   async function connect() {
@@ -239,7 +251,6 @@
       while (true) {
         await mainloop(readerStream, writer);
         await countdown();
-        alert('Appuyez sur Entrée pour recommencer');
       }
     } catch (error) {
       alert('Erreur lors de connexion, regardez la console');
@@ -266,7 +277,7 @@
   </div>
   <div class:hidden={debugHidden} class="debug-content">
     <div class="debug-section">
-      <button class="reset-btn" onclick={resetConfig}>Recommencer</button>
+      <button class="reset-btn" onclick={restartGame}>Recommencer</button>
       <p class="debug-label">Cibles assignées:</p>
       <div class="targets-grid">
         {#each targetIds as targetId}

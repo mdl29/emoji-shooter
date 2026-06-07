@@ -31,14 +31,12 @@ button#connect {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   z-index: 100;
 }
 
 button#connect:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   background: #333333;
 }
 
@@ -232,11 +230,8 @@ button#connect:active {
 }
 
 .score-container {
-  background: rgba(0, 0, 0, 0.03);
-  backdrop-filter: blur(10px);
   padding: 24px 48px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
   animation: slideInUp 0.6s ease-out 0.1s backwards;
 }
 
