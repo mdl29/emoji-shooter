@@ -23,6 +23,7 @@ function copyAssetDir() {
 }
 
 export default defineConfig({
+  base: '/emoji-shooter/',
   build: {
     assetsDir: 'asset'
   },
