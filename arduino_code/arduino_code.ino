@@ -18,11 +18,6 @@ public:
 
         lastState = digitalRead(pin);
         updateLED();
-
-        if (lastState == HIGH) {
-          printId();
-          delay(500);
-        }
     }
 
     bool state() {
@@ -41,31 +36,22 @@ public:
       if (curState != lastState) {
         lastState = curState;
 
-        //printState();
         updateLED();
+        printState();
 
-        if (curState == HIGH) {
-          printId();
-          delay(500);
-        }
+        delay(50);
       }
-    }
-
-    void printId() {
-      Serial.println(id);
     }
 
     void printState() {
-      // Logging function
-      
-      Serial.print(id);
       if (lastState) {
-        Serial.println(": HIGH");
+        Serial.print("up:");
       } else {
-        Serial.println(": LOW");
+        Serial.print("down:");
       }
-    }
-    
+      
+      Serial.println(id);
+    }    
 };
 
 
@@ -100,6 +86,7 @@ void blinkAllLEDs() {
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("debug:starting");
   
   for (auto& target : targets) {
     target.init();
