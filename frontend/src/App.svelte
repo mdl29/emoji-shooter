@@ -3,22 +3,18 @@
   import emojiData from '../asset/emojis.json';
 
   const keyFromPath = (path) => path.split('/').pop().replace(/\.[^.]+$/, '');
-  const emojiList = emojiData.map((emoji, index) => ({
+  const emojiList = emojiData.emojis.map((emoji, index) => ({
     ...emoji,
     id: index + 1,
     key: keyFromPath(emoji.path)
   }));
   const emojiByKey = Object.fromEntries(emojiList.map((emoji) => [emoji.key, emoji]));
+  const emojiByName = Object.fromEntries(emojiList.map((emoji) => [emoji.nom, emoji]));
   const emojiDrawings = emojiList.map((emoji) => emoji.key);
 
-  const defaultEmojis = {
-    christian: 1,
-    adrien: 2,
-    erell: 3,
-    thibo: 4,
-    poop: 5,
-    cry: 6
-  };
+  const defaultEmojis = Object.fromEntries(
+    emojiData.defaults.map((name, index) => [emojiByName[name].key, index + 1])
+  );
   
   const targetIds = Object.values(defaultEmojis);
 

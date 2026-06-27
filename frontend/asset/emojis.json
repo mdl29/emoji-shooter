@@ -1,13 +1,16 @@
-[
-  { "nom": "Christian", "path": "asset/targets/christian.webp" },
-  { "nom": "Adrien", "path": "asset/targets/adrien.svg" },
-  { "nom": "Erell", "path": "asset/targets/erell.webp" },
-  { "nom": "Thibo", "path": "asset/targets/thibo.svg" },
-  { "nom": "Poop", "path": "asset/targets/poop.webp" },
-  { "nom": "Cry", "path": "asset/targets/cry.webp" },
-  { "nom": "Devil", "path": "asset/targets/devil.webp" },
-  { "nom": "Laugh", "path": "asset/targets/laugh.webp" },
-  { "nom": "Thug", "path": "asset/targets/thug.webp" },
-  { "nom": "Kiss", "path": "asset/targets/kiss.webp" },
-  { "nom": "Choqué", "path": "asset/targets/chocked.webp" }
-]
+{
+  "emojis": [
+    { "nom": "Christian", "path": "asset/targets/christian.webp" },
+    { "nom": "Adrien", "path": "asset/targets/adrien.svg" },
+    { "nom": "Erell", "path": "asset/targets/erell.webp" },
+    { "nom": "Thibo", "path": "asset/targets/thibo.svg" },
+    { "nom": "Poop", "path": "asset/targets/poop.webp" },
+    { "nom": "Cry", "path": "asset/targets/cry.webp" },
+    { "nom": "Devil", "path": "asset/targets/devil.webp" },
+    { "nom": "Laugh", "path": "asset/targets/laugh.webp" },
+    { "nom": "Thug", "path": "asset/targets/thug.webp" },
+    { "nom": "Kiss", "path": "asset/targets/kiss.webp" },
+    { "nom": "Choqué", "path": "asset/targets/chocked.webp" }
+  ],
+  "defaults": ["Christian", "Adrien", "Erell", "Thibo", "Poop", "Cry"]
+}
