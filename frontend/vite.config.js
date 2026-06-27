@@ -22,8 +22,12 @@ function copyAssetDir() {
   };
 }
 
+// Sur GitHub Pages le site est servi depuis /emoji-shooter/.
+// En local (dev ou build) on garde la racine "/".
+const base = process.env.GITHUB_PAGES === 'true' ? '/emoji-shooter/' : '/';
+
 export default defineConfig({
-  base: '/emoji-shooter/',
+  base,
   build: {
     assetsDir: 'asset'
   },
