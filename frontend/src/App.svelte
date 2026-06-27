@@ -19,7 +19,7 @@
     poop: 5,
     cry: 6
   };
-
+  
   const targetIds = Object.values(defaultEmojis);
 
   let port;
