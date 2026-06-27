@@ -1,7 +1,7 @@
 [
   { "nom": "Christian", "path": "asset/targets/christian.webp" },
   { "nom": "Adrien", "path": "asset/targets/adrien.svg" },
-  { "nom": "Erell", "path": "asset/targets/erell.svg" },
+  { "nom": "Erell", "path": "asset/targets/erell.webp" },
   { "nom": "Thibo", "path": "asset/targets/thibo.svg" },
   { "nom": "Poop", "path": "asset/targets/poop.webp" },
   { "nom": "Cry", "path": "asset/targets/cry.webp" },
