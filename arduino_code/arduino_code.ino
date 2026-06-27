@@ -97,7 +97,7 @@ void loop() {
   // Check for serial input
   if (Serial.available() > 0) {
     char incomingChar = Serial.read();
-    if (incomingChar == 'f') {
+    if (incomingChar == "effects:fireworks") {
       blinkAllLEDs();
       // Clear any remaining characters in the buffer
       while (Serial.available() > 0) {

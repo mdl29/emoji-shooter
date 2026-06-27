@@ -234,8 +234,8 @@
     if (availableKeys.length === 0) {
       console.log('Toutes les cibles ont été touchées !');
       characterSrc = 'asset/fest.svg';
-      await writer.write('f');
-      console.log("Command 'f' sent to make LED blinks");
+      await writer.write('effects:fireworks');
+      console.log("Command 'effects:fireworks' sent to make LED blinks");
       return true;
     }
 
