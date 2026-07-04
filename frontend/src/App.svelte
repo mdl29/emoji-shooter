@@ -1,29 +1,21 @@
 <script>
   import { onMount } from 'svelte';
+  import emojiData from '../asset/emojis.json';
 
-  const defaultEmojis = {
-    christian: 1,
-    adrien: 2,
-    erell: 3,
-    thibo: 4,
-    poop: 5,
-    cry: 6
-  };
+  const keyFromPath = (path) => path.split('/').pop().replace(/\.[^.]+$/, '');
+  const emojiList = emojiData.emojis.map((emoji, index) => ({
+    ...emoji,
+    id: index + 1,
+    key: keyFromPath(emoji.path)
+  }));
+  const emojiByKey = Object.fromEntries(emojiList.map((emoji) => [emoji.key, emoji]));
+  const emojiByName = Object.fromEntries(emojiList.map((emoji) => [emoji.nom, emoji]));
+  const emojiDrawings = emojiList.map((emoji) => emoji.key);
 
-  const emojiDrawings = [
-    'christian',
-    'adrien',
-    'erell',
-    'thibo',
-    'poop',
-    'cry',
-    'devil',
-    'laugh',
-    'thug',
-    'kiss',
-    'chocked'
-  ];
-
+  const defaultEmojis = Object.fromEntries(
+    emojiData.defaults.map((name, index) => [emojiByName[name].key, index + 1])
+  );
+  
   const targetIds = Object.values(defaultEmojis);
 
   let port;
@@ -62,7 +54,7 @@
   });
 
   function targetSrc(key) {
-    return `asset/targets/${key}.svg`;
+    return emojiByKey[key].path;
   }
 
   function getEmojiForTarget(targetId) {
@@ -101,8 +93,7 @@
   }
 
   function formatEmojiName(key) {
-    if (key === 'chocked') return 'Choqué';
-    return key.charAt(0).toUpperCase() + key.slice(1);
+    return emojiByKey[key].nom;
   }
 
   function loadConfigFromStorage() {
@@ -167,43 +158,85 @@
   async function mainloop(readerStream, writer) {
     startGame();
 
+    let buffer = '';
+
     while (true) {
       const { value, done } = await readerStream.read();
       if (done) break;
       if (!value) continue;
 
-      const triggeredTarget = parseInt(value.trim(), 10);
-      if (Number.isNaN(triggeredTarget)) continue;
+      buffer += value;
 
-      if (triggeredTarget === currentTargetId) {
-        console.log('Hit :', currentKey);
-        availableKeys = availableKeys.filter((key) => key !== currentKey);
-        score += 5;
-      } else {
-        console.log('Missed : ', currentKey);
-        if (score >= 5) {
-          score -= 2;
-        }
+      let newlineIndex;
+      while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, newlineIndex).trim();
+        buffer = buffer.slice(newlineIndex + 1);
 
-        const triggeredEmojiName = getEmojiForTarget(triggeredTarget);
-        if (triggeredEmojiName) {
-          console.log(`Removed ${triggeredEmojiName} (${triggeredTarget})`);
-          availableKeys = availableKeys.filter((key) => key !== triggeredEmojiName);
-        }
+        if (!line) continue;
+
+        const finished = await handleMessage(line, writer);
+        if (finished) return;
       }
-
-      updateScore();
-
-      if (availableKeys.length === 0) {
-        console.log('Toutes les cibles ont été touchées !');
-        characterSrc = 'asset/fest.svg';
-        await writer.write('f');
-        console.log("Command 'f' sent to make LED blinks");
-        break;
-      }
-
-      updateTarget();
     }
+  }
+
+  async function handleMessage(line, writer) {
+    const separatorIndex = line.indexOf(':');
+    if (separatorIndex < 0) {
+      console.log('Unknown message:', line);
+      return false;
+    }
+
+    const type = line.slice(0, separatorIndex);
+    const payload = line.slice(separatorIndex + 1).trim();
+
+    if (type === 'debug') {
+      console.log('Arduino debug:', payload);
+      return false;
+    }
+
+    // A hit happens when a target jumps and releases its switch ("up").
+    // "down" means the target was placed back upright; we ignore it.
+    if (type !== 'up') {
+      return false;
+    }
+
+    const triggeredTarget = parseInt(payload, 10);
+    if (Number.isNaN(triggeredTarget)) return false;
+
+    return registerHit(triggeredTarget, writer);
+  }
+
+  async function registerHit(triggeredTarget, writer) {
+    if (triggeredTarget === currentTargetId) {
+      console.log('Hit :', currentKey);
+      availableKeys = availableKeys.filter((key) => key !== currentKey);
+      score += 5;
+    } else {
+      console.log('Missed : ', currentKey);
+      if (score >= 5) {
+        score -= 2;
+      }
+
+      const triggeredEmojiName = getEmojiForTarget(triggeredTarget);
+      if (triggeredEmojiName) {
+        console.log(`Removed ${triggeredEmojiName} (${triggeredTarget})`);
+        availableKeys = availableKeys.filter((key) => key !== triggeredEmojiName);
+      }
+    }
+
+    updateScore();
+
+    if (availableKeys.length === 0) {
+      console.log('Toutes les cibles ont été touchées !');
+      characterSrc = 'asset/fest.svg';
+      await writer.write('effects:fireworks');
+      console.log("Command 'effects:fireworks' sent to make LED blinks");
+      return true;
+    }
+
+    updateTarget();
+    return false;
   }
 
   async function countdown() {

@@ -22,8 +22,10 @@ function copyAssetDir() {
   };
 }
 
+const base = process.env.GITHUB_PAGES === 'true' ? '/emoji-shooter/' : '/';
+
 export default defineConfig({
-  base: '/emoji-shooter/',
+  base,
   build: {
     assetsDir: 'asset'
   },
