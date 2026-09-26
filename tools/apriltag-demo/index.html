@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AprilTag 16h5 - démo webcam</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 1.1rem;
+      margin: 0 0 4px;
+    }
+    p.hint {
+      margin: 0 0 12px;
+      color: #aaa;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .stage {
+      position: relative;
+      max-width: 100%;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+      background: #000;
+      border-radius: 4px;
+    }
+    #status {
+      margin-top: 10px;
+      color: #f88;
+      font-size: 0.9rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Détecteur AprilTag 16h5</h1>
+  <p class="hint">Autorisez la webcam et présentez un tag AprilTag de la famille 16h5.</p>
+
+  <div class="stage">
+    <video id="video" autoplay playsinline muted style="display:none"></video>
+    <canvas id="canvas"></canvas>
+  </div>
+  <div id="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/cv.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/aruco.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/dictionaries/apriltag_16h5.js"></script>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const statusEl = document.getElementById('status');
+
+    // AR.Detector.detect() already converts the frame to grayscale internally
+    // (via CV.grayscale) before thresholding/finding contours, so no
+    // separate grayscale pre-pass is needed here.
+    const detector = new AR.Detector({ dictionaryName: 'APRILTAG_16h5' });
+
+    function setStatus(message) {
+      statusEl.textContent = message || '';
+    }
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus("La webcam n'est pas accessible (nécessite https:// ou localhost).");
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false,
+        });
+        video.srcObject = stream;
+        await video.play();
+        video.addEventListener('loadedmetadata', onVideoReady, { once: true });
+        if (video.videoWidth) {
+          onVideoReady();
+        }
+      } catch (err) {
+        setStatus('Impossible d\'accéder à la webcam : ' + err.message);
+      }
+    }
+
+    function onVideoReady() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      requestAnimationFrame(processFrame);
+    }
+
+    function markerCenter(corners) {
+      let x = 0, y = 0;
+      for (const c of corners) {
+        x += c.x;
+        y += c.y;
+      }
+      return { x: x / corners.length, y: y / corners.length };
+    }
+
+    function drawMarker(marker) {
+      const { corners, id } = marker;
+
+      ctx.strokeStyle = '#00ff6a';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(corners[0].x, corners[0].y);
+      for (let i = 1; i < corners.length; i++) {
+        ctx.lineTo(corners[i].x, corners[i].y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.fillStyle = '#00ff6a';
+      for (const c of corners) {
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const center = markerCenter(corners);
+      const label = 'id ' + id;
+      ctx.font = 'bold 16px system-ui, sans-serif';
+      const textWidth = ctx.measureText(label).width;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+      ctx.fillRect(center.x - textWidth / 2 - 4, center.y - 10, textWidth + 8, 20);
+      ctx.fillStyle = '#00ff6a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, center.x, center.y);
+    }
+
+    function processFrame() {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      const markers = detector.detect(imageData);
+      for (const marker of markers) {
+        drawMarker(marker);
+      }
+
+      setStatus(markers.length ? '' : 'Aucun tag détecté.');
+      requestAnimationFrame(processFrame);
+    }
+
+    startCamera();
+  </script>
+</body>
+</html>
