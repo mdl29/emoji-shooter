@@ -105,6 +105,19 @@
     selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
   }
 
+  // Retire le logo d'une cible : la base n'a pas de paddle (cible null).
+  function unassignTarget(targetId) {
+    const nextEmojis = { ...emojis };
+    const previousKeyForTarget = Object.keys(nextEmojis).find(
+      (key) => nextEmojis[key] === targetId
+    );
+    if (previousKeyForTarget) {
+      delete nextEmojis[previousKeyForTarget];
+    }
+    emojis = nextEmojis;
+    selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
+  }
+
   function formatEmojiName(key) {
     return emojiByKey[key].nom;
   }
@@ -115,14 +128,17 @@
 
     try {
       const savedConfig = JSON.parse(saved);
-      emojis = { ...defaultEmojis };
-
+      // Reconstruction depuis zéro : une cible absente = cible null (vide),
+      // on ne ré-applique jamais les défauts par-dessus un vide explicite.
+      const nextEmojis = {};
       for (const targetId of targetIds) {
         const savedKey = emojiDrawings.find((key) => savedConfig[key] === targetId);
         if (savedKey) {
-          assignEmojiToTarget(targetId, savedKey);
+          nextEmojis[savedKey] = targetId;
         }
       }
+      emojis = nextEmojis;
+      selectedEmojiByTarget = getSelectedEmojiByTarget(emojis);
 
       console.log('Config loaded from localStorage:', emojis);
     } catch (error) {
@@ -273,18 +289,25 @@
   }
 
   // Décide des mises à jour après détection (fonction pure, testable).
+  // - Base sans paddle : la cible devient null (menu "Vide").
   // - Tag paddle déjà connu (tag -> logo appris avant) : la cible prend le
   //   logo connu => met à jour le menu déroulant du dessus.
   // - Tag paddle jamais vu : on apprend le logo actuellement sélectionné.
-  // Retourne { assignments: {cibleId: logoKey}, learned: {paddleTag: logoKey} }.
+  // Retourne { assignments: {cibleId: logoKey}, learned: {paddleTag: logoKey},
+  //             toEmpty: [cibleId] }.
   function computeLinkUpdates(pairs, emojiForTarget, knownLogoByPaddleTag) {
     const assignments = {};
     const learned = {};
+    const toEmpty = [];
     const known = { ...knownLogoByPaddleTag };
     for (const pair of pairs) {
-      if (pair.paddleTag == null) continue;
-      const knownLogo = known[pair.paddleTag];
       const currentLogo = emojiForTarget[pair.cibleId];
+      if (pair.paddleTag == null) {
+        // Pas de cible sur la base => cible null (seulement si changement).
+        if (currentLogo) toEmpty.push(pair.cibleId);
+        continue;
+      }
+      const knownLogo = known[pair.paddleTag];
       if (knownLogo) {
         if (knownLogo !== currentLogo) {
           assignments[pair.cibleId] = knownLogo;
@@ -294,7 +317,7 @@
         known[pair.paddleTag] = currentLogo;
       }
     }
-    return { assignments, learned };
+    return { assignments, learned, toEmpty };
   }
 
   function drawLinkPreview(img, bases, paddles, paddleByBaseTag) {
@@ -387,7 +410,7 @@
       const emojiSnapshot = Object.fromEntries(
         targetIds.map((targetId) => [targetId, getEmojiForTarget(targetId)])
       );
-      const { assignments, learned } = computeLinkUpdates(
+      const { assignments, learned, toEmpty } = computeLinkUpdates(
         pairs,
         emojiSnapshot,
         nextLogoByTargetTag
@@ -402,7 +425,13 @@
         assignEmojiToTarget(Number(cibleId), logoKey);
         updatedCount++;
       }
-      if (updatedCount > 0) {
+      // Base sans cible associée => cible null (menu "Vide").
+      let emptiedCount = 0;
+      for (const cibleId of toEmpty) {
+        unassignTarget(cibleId);
+        emptiedCount++;
+      }
+      if (updatedCount > 0 || emptiedCount > 0) {
         saveConfigToStorage();
       }
 
@@ -422,6 +451,7 @@
         `${pairs.length - emptyCount}/${pairs.length} base(s) liée(s)` +
         `${emptyCount ? ` (${emptyCount} vide(s))` : ''} · ` +
         `${updatedCount} menu(s) déroulant(s) mis à jour` +
+        `${emptiedCount ? ` · ${emptiedCount} vidé(s)` : ''}` +
         `${learnedCount ? ` · ${learnedCount} nouveau(x) tag(s) appris` : ''}. ` +
         `Config AprilTag mise à jour.`;
       drawLinkPreview(img, bases, paddles, paddleByBaseTag);
@@ -442,6 +472,12 @@
     availableKeys = getAssignedEmojiKeys();
     score = 0;
     updateScore();
+    if (availableKeys.length === 0) {
+      currentKey = null;
+      currentTargetId = null;
+      scoreText = 'Aucune cible : assignez des logos dans le debug menu';
+      return;
+    }
     updateTarget();
   }
 
@@ -455,6 +491,12 @@
 
   function changeTarget(targetId, event) {
     const newValue = event.currentTarget.value;
+    if (!newValue) {
+      unassignTarget(targetId);
+      console.log(`Target ${targetId} emptied (pas de cible sur la base)`);
+      saveConfigToStorage();
+      return;
+    }
     assignEmojiToTarget(targetId, newValue);
     console.log(`Target ${targetId} changed to: ${newValue}`);
     saveConfigToStorage();
@@ -465,6 +507,7 @@
   }
 
   function updateTarget() {
+    if (availableKeys.length === 0) return;
     const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
     currentKey = randomKey;
     currentTargetId = emojis[currentKey];
@@ -524,6 +567,9 @@
   }
 
   async function registerHit(triggeredTarget, writer) {
+    // Aucune cible assignée (tout est null) : on ignore les hits.
+    if (currentTargetId == null) return false;
+
     if (triggeredTarget === currentTargetId) {
       console.log('Hit :', currentKey);
       availableKeys = availableKeys.filter((key) => key !== currentKey);
@@ -635,9 +681,10 @@
             <select
               id={`target-${targetId}`}
               class="target-select"
-              value={selectedEmojiByTarget[targetId]}
+              value={selectedEmojiByTarget[targetId] ?? ''}
               onchange={(event) => changeTarget(targetId, event)}
             >
+              <option value="">— Vide (pas de cible) —</option>
               {#each emojiDrawings as key}
                 <option value={key}>{formatEmojiName(key)}</option>
               {/each}
@@ -657,10 +704,10 @@
       <p class="link-hint">
         Bases : tags 0-5 · Paddles : tags &gt; 5 (la base est toujours plus bas que sa
         cible). Détecte les tags sur <code>camera_example.png</code>, apparie chaque paddle
-        à la base la plus proche <strong>sous</strong> lui, puis : si le tag est connu, le
-        menu déroulant de la cible est mis à jour avec le logo associé ; si c'est un
-        nouveau tag, le logo actuellement sélectionné lui est associé (une base peut être
-        vide).
+        à la base la plus proche <strong>sous</strong> lui, puis : si la base n'a pas
+        de cible, son menu passe à « Vide » (cible null) ; si le tag est connu, le menu
+        de la cible est mis à jour avec le logo associé ; si c'est un nouveau tag, le
+        logo actuellement sélectionné lui est associé.
       </p>
       <button class="link-btn" onclick={linkTargetsToBases} disabled={linkBusy}>
         {linkBusy ? 'Liaison en cours…' : 'Lier'}
