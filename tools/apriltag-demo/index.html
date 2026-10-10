@@ -43,6 +43,21 @@
       text-align: center;
       min-height: 1.2em;
     }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    .controls input[type="range"] {
+      width: 180px;
+    }
+    #fpsValue {
+      min-width: 7ch;
+      text-align: right;
+      color: #0f8;
+    }
   </style>
 </head>
 <body>
@@ -55,6 +70,12 @@
   </div>
   <div id="status"></div>
 
+  <div class="controls">
+    <label for="fps">FPS caméra</label>
+    <input type="range" id="fps" min="1" max="30" step="1" value="8">
+    <span id="fpsValue">8</span>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/cv.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/aruco.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/dictionaries/apriltag_16h5.js"></script>
@@ -63,15 +84,42 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const statusEl = document.getElementById('status');
+    const fpsInput = document.getElementById('fps');
+    const fpsValueEl = document.getElementById('fpsValue');
 
     // AR.Detector.detect() already converts the frame to grayscale internally
     // (via CV.grayscale) before thresholding/finding contours, so no
     // separate grayscale pre-pass is needed here.
     const detector = new AR.Detector({ dictionaryName: 'APRILTAG_16h5' });
 
+    // Baisser la fréquence d'image laisse la caméra exposer plus longtemps
+    // (auto-exposition), donc moins de flou de mouvement et une meilleure
+    // détection en faible lumière.
+    let targetFps = Number(fpsInput.value);
+
     function setStatus(message) {
       statusEl.textContent = message || '';
     }
+
+    function fpsConstraints() {
+      return { ideal: targetFps, max: targetFps };
+    }
+
+    async function applyFps() {
+      fpsValueEl.textContent = targetFps;
+      const track = video.srcObject && video.srcObject.getVideoTracks()[0];
+      if (!track) return;
+      try {
+        await track.applyConstraints({ frameRate: fpsConstraints() });
+      } catch (err) {
+        setStatus('Réglage FPS ignoré : ' + err.message);
+      }
+    }
+
+    fpsInput.addEventListener('input', () => {
+      targetFps = Number(fpsInput.value);
+      applyFps();
+    });
 
     async function startCamera() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -80,7 +128,7 @@
       }
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
+          video: { facingMode: 'environment', frameRate: fpsConstraints() },
           audio: false,
         });
         video.srcObject = stream;
@@ -89,6 +137,7 @@
         if (video.videoWidth) {
           onVideoReady();
         }
+        applyFps();
       } catch (err) {
         setStatus('Impossible d\'accéder à la webcam : ' + err.message);
       }
